@@ -16,4 +16,3 @@ You can find the full code on the RMD file [here](https://github.com/mzouvelos/C
 
 You can find the full analysis on a nice format on my Kaggle notebook format of the project [here!](https://www.kaggle.com/michalisz/analytical-customer-segmentation-analysis-r)
 
-Or directly on an html github.io link [here!](https://htmlpreview.github.io/?https://github.com/mzouvelos/Customer_Segmentation_Clustering_Project/blob/main/Customer-Segmentation-file.html)
