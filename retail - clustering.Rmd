@@ -1,0 +1,1298 @@
+---
+title: "Analytical Customer Segmentation Analysis | R 🛒🚶"
+author: "Michalis Zouvelos"
+date: '`r Sys.Date()`'
+output: 
+  html_document:
+    number_sections: true
+    fig_caption: true
+    toc: true
+    toc_depth: 2
+    fig_width: 7
+    fig_height: 4.5
+    code_folding: hide
+    df_print: paged
+    theme: cosmo
+    highlight: tango
+editor_options:
+  chunk_output_type: inline
+---
+
+
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;">Customer Segmentation Analysis 🛒🛒🛒 </p>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(out.width="100%", fig.height = 4.5, split=FALSE, fig.align = 'default')
+options(dplyr.summarise.inform = FALSE)
+```
+
+<div 
+    style="background-image: url('https://www.namogoo.com/wp-content/uploads/2021/05/The-Ultimate-Guide-to-eCommerce-Customer-Segmentation-1200x500-new.png'); 
+    width:100%; 
+    height:400px; 
+    background-position:center;">&nbsp;
+</div>
+
+*Photo by Namogoo*
+
+
+# Introduction 
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> Goal 🎯 </p>
+
+In this Analysis, I will perform Customer Segmentation/Clustering of online retail customers from an e-commerce store. 
+
+In the fast-paced contemporary socioeconomic world, identifying customer behavior and categorizing your consumer base is critical to achieving an edge against your competitors and mainly enables your marketing and strategy team to act.
+
+Furthermore, more and more companies use CRM software to try and optimize their customer relationships. (Customer Relationship Management (CRM) is a technology that handles customer relationships to improve corporate performance) Customer segmentation is vital in CRM since it helps identify customers by grouping them.
+
+
+Hence, the primary goal is to formulate a model that will group the customers into valuable and actionable insights.
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> About the dataset 📑 </p>
+
+The dataset that is being used is a widely and broadly used dataset provided from [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Online+Retail+II). 
+
+
+Data Set Information:
+
+The dataset is primarily known as Online Retail II and contains all the transactions occurring for a UK-based and registered, non-store online retail between 01/12/2009 and 09/12/2011. The dataset used is derived from the original dataset but is cut in half, with the transactions being between 1/12/2010 and 09/12/2011.
+The company mainly sells unique all-occasion gift-ware. Many customers of the company are wholesalers. 
+
+Here is a brief version of the data description file.
+
+- **InvoiceNo**: Invoice number. Nominal. A 6-digit integral number is uniquely assigned to each transaction. If this code starts with the letter C, it indicates a cancellation.
+- **StockCode**: Product (item) code. Nominal. A 5-digit integral number is uniquely assigned to each distinct product.
+- **Description**: Product (item) name. Nominal.
+- **Quantity**: The quantities of each product (item) per transaction. Numeric.
+- **InvoiceDate**: Invoice date and time. Numeric. The day and time when a transaction was generated.
+- **UnitPrice**: Unit price. Numeric. Product price per unit.
+- **CustomerID**: Customer number. Nominal. A 5-digit integral number uniquely assigned to each customer.
+- **Country**: Country name. Nominal. The name of the country where a customer resides.
+
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> Unsupervised Learning 💻  </p>
+
+Customer Segmentation is a classic example of an Unsupervised Learning problem. Unsupervised algorithms make inferences from datasets using only input vectors without referring to known or labeled outcomes.
+There is no straightforward way to compare model performance in most unsupervised learning methods because no labels are provided. Generally, the most ordinary tasks within unsupervised learning are clustering like this Analysis, representation learning, and density estimation. In all of these circumstances, we want to learn the data inherent structure without requiring labels that are explicitly provided. K-means clustering, principal component analysis, and autoencoders are examples of prevalent algorithms.
+
+
+Clustering has a myriad of uses in a variety of industries. Some common applications for clustering include the following [google](https://developers.google.com/machine-learning/clustering/overview):
+
+- market segmentation
+- social network analysis
+- search result grouping
+- medical imaging
+- image segmentation
+- anomaly detection
+
+<div 
+    style="background-image: url('https://miro.medium.com/max/1400/1*5f8VujKLQKhQZRafA2t9hw.png'); 
+    width:100%; 
+    height:500px; 
+    background-position:center;">&nbsp;
+</div>
+
+*Image source:bigdata-madesimple.com*
+
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> Customer Segmentation 🛒  </p>
+
+Customer segmentation is the process of dividing customers into groups based on common behaviors or other characteristics. The groupings should be homogeneous within themselves and heterogeneous in relation to one another. The ultimate goal of this approach is to find a high-value client base, or customers with the greatest potential for growth or profit.
+
+Customer segmentation insights are used to create tailored marketing campaigns as well as overall marketing strategy and planning.Broadly, Customer segmentation is the practice of dividing a company s customers into groups that reflect similarities among customers in each group.
+
+Effective Customer Segmentation can have several benefits for your business, such as:
+
+1. More Effective Marketing Strategy
+2. Optimizing the Customer Journey
+3. Predict Customer Behavior
+4. Personalizing the Customer Experience
+5. Improves Customer Loyalty & Retention
+6. Improves Conversion Metrics
+7. Supports Product Development
+
+
+
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> Analysis Action Plan 🧮 </p>
+
+The structure that I will follow for this analysis will include the following steps - sections:
+
+- **First**, I will load the required packages and the dataset to complete the analysis
+- **Second**, I will perform Data Cleaning and Feature Engineering to prepare the data for the next steps and get insightful information
+- **Third**, I will conduct an Exploratory Data Analysis (EDA) to understand the critical information that the data holds and visualize the main drivers and KPIs
+- **Fourth**, I will cluster the customers using k-means algorithm approach, to the concept of segmentation, to derive an optimal amount of clusters. Subsequently, an RFM analysis and score will be performed. to become able to comprehend the valuable underlying customer insights in an actionable fashion
+- **Fifth**, a conclusion and references will be provided at the end
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> Setting Up 🧱 </p>
+
+# Packages | Importing Data | First Glimpse {.tabset .tabset-fade .tabset-pills}
+
+## Importing Libraries
+
+Importing the required R libraries that will be used throughout the analysis.
+A package that I believe is worth mentioning is the highcharter package which I used for the visualizations on the EDA section of the analysis.
+You can find more information about the highcharter package and its use [here!](https://jkunst.com/highcharter/index.html)
+
+
+```{r , message = FALSE, warning = FALSE}
+# suppress warning message / global option output
+options(warn = -1)
+
+# Importing the required Packages
+library(tidyverse)
+library(readxl)
+library(DataExplorer)
+library(visdat)
+library(naniar)
+library(rmarkdown)
+library(knitr)
+library(DT)
+library(wordcloud2) # Wordclouds
+library(extrafont) # Wordclouds
+library(SnowballC) # Wordclouds
+library(tm) # Wordclouds
+library(dlookr) # Data Diagnosis and Exploration
+library(gridExtra)
+library(scales)
+library(lubridate) # date modifying library
+library(ggThemeAssist)
+library(plotly) # Interactive data visualizations
+library(hrbrthemes)
+library(xts)
+library(highcharter) # Interactive data visualizations
+library(countrycode)
+library(factoextra) # multivariate data analyses - K-means clustering
+```
+
+
+## Loading Data
+
+Loading the dataset provided from kaggle and getting a View of the data.
+
+```{r}
+# Loading the dataset
+retail <- read_excel("Retail.xlsx")
+
+# getting data View
+  # View(retail)
+```
+
+
+## Structure of the dataset
+
+The data consists of 8 features, namely: InvoiceNo, StockCode, Description, Quantity, InvoiceDate, UnitPrice, CustomerID. Country with 541,909 rows.
+More information about its unique feature is provided in the introduction section above, but we can already see that some numeric variables are in chr data type and the InvoiceDate feature is in a bad format that we will have to address later to make better use of the date and time info.
+```{r, result='asis'}
+# getting information about the structure of the data
+str(retail)
+```
+
+## Summary of the data
+
+From the summary of the dataset we get more information about its specific feature.
+We see that there are negative values for Quantity and UnitPrice features, which we can conclude that its either a false input or a cancelled order, we will have to address these issues on the data cleaning section of the project.
+We can also see from our summary that our data start from 2010-12-01 and end on 2011-12-09, so a couple days more than a whole year of transaction data.
+```{r}
+# getting summarized information about the features of the data
+summary(retail)
+```
+
+## First 5 rows
+
+Peek on the first 5 rows
+```{r}
+# Peek on the first 5 rows
+head(retail, 5)
+```
+
+## Last 5 rows
+
+Peek in the last 5 rows
+```{r}
+# Peek in the last 5 rows
+tail(retail, 5)
+```
+
+
+## Unique customers & products
+
+Our dataset consists of 4.373 unique CustomerID values and 4.212 unique products based on distinct Descriptions
+```{r}
+# Getting the amount of distinct CustomerID values
+n_distinct(retail$CustomerID)
+n_distinct(retail$Description)
+```
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> Data wrangling 💡 </p>
+
+# Data Preparation
+
+As most of the times, I will try to clean the dataset where required, so that it will be more clear what approach I should take. First lets look at some basic information about the data.
+
+The section is broken down to two subsections:
+- Data Cleaning
+- Feature Engineering
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> Data Cleaning 🧹 </p>
+## Data Cleaning
+
+**Checking & Dealing with missing values**
+
+Plotting percentage of missing values per feature
+```{r}
+# Plotting percentage of missing values per feature
+gg_miss_var(retail, show_pct = TRUE)
+```
+
+We can see that there are a lot of CustomerIDs missing, and a very small percentage of Descriptions missing from the data.
+
+For the NAs on CustomerID we will remove them from the data since the dataset is rich enough to have a pretty large sample to serve our purpose even without the missing values which could lead to false results.
+
+For the NAs on description we will replace them with an empty string value
+```{r}
+# Deleting rows where CustomerID is missing
+retail <- retail %>% 
+  na.omit(retail$CustomerID)
+
+# Replacing NA Description values with the string "empty"
+retail$Description <- replace_na(retail$Description, "empty")
+```
+
+
+
+**Checking & Treating Outliers**
+Dealing and Treating Outliers in data is always essential for accurate results.
+
+
+For detecting outliers I will use the simple package dlookr which I believe does an excellent job at plotting useful information to spot anomalies and outliers in just a single line of code, as well as for further Data Diagnosis & Exploration purposes. You can find more about the package [here](https://yuzar-blog.netlify.app/posts/2021-01-30-r-package-reviews-dlookr-diagnose-explore-and-transform-your-data/)
+```{r}
+# plotting outliers for Quantity and UnitPrice
+
+plot_outlier(retail, Quantity, UnitPrice, col = "#ACAC89")
+```
+
+
+
+Lets check the minimum and maximum Unit Price of products
+```{r}
+min(retail$UnitPrice)
+max(retail$UnitPrice)
+```
+
+
+From the plots we can see that there are some negative values in our data for Quantity, as well as some zero value inputs, so we will remove them.
+
+**But** before we remove them it is essential to check the positive outlier values in the Quantity data as it seems that the positive and negative outliers are connected. This would mean that some of these outliers could be cancelled or wrong orders that then got returned and thus were assigned with a negative value. This would mean that we would have to remove also their positive counterparts as they would not be orders that actually occured and these values would bias our data and results. So lets check them out
+
+```{r}
+# checking quantities that are negative, arranged by descending order
+quantity_check <- retail %>% 
+  filter(Quantity < 0) %>% 
+  arrange(Quantity)
+
+head(quantity_check, 3)
+```
+
+Indeed we can see that these negative Quantities reflect cancelled orders, hence the C letter in front of the Invoice Number.
+We have in total 8.905 rows of cancelled Invoices orders. And there also seems to be some very big cancelled ordered Quantities that we have to check further.
+
+Lets check the Customer with ID 16446 that had a cancelled order with a Quantity of 80.995 Paper Craft, Little Birdie products.
+
+```{r}
+retail %>% 
+  filter(CustomerID == 16446)
+
+```
+
+As we can see the Customer 16446 made an order with Invoice Number 581483 on 2011-12-09 09:15:00 and 12 minutes later the order got cancelled.
+Obviously this order reflects a fault **but removing only the negative quantity** would have undermined the analysis, thus it is imperative that the positive counterparts of the cancelled orders be removed as well, as they do not reflect actual transaction data. However, as we observe from the data it is not always the case that a cancelled order has an existing positive counterpart that would bias the data, thus just removing the negative quantity of the cancelled order in this case would be enough (this is the case for example with customer 15838.
+
+Also we see that the customer with ID 15749 seems to have a lot of large quantity cancelled orders.
+
+We will remove the positive counterparts from Customers 16446 and 12346, as I explained earlier they pose a bias threat for the analysis and I will delete them. 
+
+```{r}
+# deleting the outliers by their Invoice Number, InvoiceNo
+retail <- retail[!(retail$InvoiceNo == 581483 | retail$InvoiceNo == 541431),]
+
+```
+
+So we will clean the dataset by filtering out negative and zero values for Quantity and Unit Price features.
+Checking again the outlier plots with the clean filtered dataset to get one more view.
+```{r}
+# filtering our data to have only positive Quantities
+retail <- retail %>% 
+  filter(Quantity > 0) %>% 
+  filter(UnitPrice >0)
+
+plot_outlier(retail, Quantity, UnitPrice, col = "#ACAC89")
+```
+
+We can see now that our Quantity outlier Diagnosis Plot looks more appropriate and accurate for the analysis.
+From the UnitPrice outlier Diagnos Plot we can also observe that most of the products that are being sold by the retailer have mostly a low price, with most of them being in the spectrum of 0 to 4 currency priced.
+
+I will check the unique countries that the dataset contains transaction data from.
+
+```{r}
+unique(retail$Country)
+```
+
+Our dataset is now clean and we can move on to creating some new features that we can work with.
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> Feature Engineering 🔨 </p>
+## Feature Engineering
+
+**Creation of new features**:
+
+- Creating a new column for the total money spent for each product, multiplying Quantity with UnitPrice and naming the new Feature as Spent
+
+- I will create a new customer dataframe where I will group by CustomerID to have a look at the amount of total money spent from each Customer buying
+products
+
+- I will also create a new date and time separate feature from the InvoiceDate current column to serve in the analysis.
+
+- Now since I split up the date and time, I will also create month, year and hour day features to get more information in the next section
+
+- I will also convert the date to the right date format
+
+- Making a new feature to get the day of the week
+
+- Setting up a frame with unique descriptions for further exploration of products offered
+
+```{r}
+  # new feature Spent for each customer, for his total amount of spent money on the store
+retail <- mutate(retail, Spent = Quantity * UnitPrice)
+  # new customer dataframe
+customer <- summarise_at(group_by(retail,CustomerID,Country), vars(Spent,Quantity), funs(sum(.,na.rm = TRUE)))
+  # new date and time columns extracted from InvoiceDate column
+retail$InvoiceDate <- as.character(retail$InvoiceDate)
+retail$date <- sapply(retail$InvoiceDate, FUN = function(x) {strsplit(x, split = '[ ]')[[1]][1]})
+retail$time <- sapply(retail$InvoiceDate, FUN = function(x) {strsplit(x, split = '[ ]')[[1]][2]})
+ # new month, year and hour columns
+retail$year <- sapply(retail$date, FUN = function(x) {strsplit(x, split = '[-]')[[1]][1]})
+retail$month <- sapply(retail$date, FUN = function(x) {strsplit(x, split = '[-]')[[1]][2]})
+retail$hour <- sapply(retail$time, FUN = function(x) {strsplit(x, split = '[:]')[[1]][1]})
+# turning date feature to date type
+retail$date <- as.Date(retail$date, "%Y-%m-%d")
+# creating day of the week feature
+retail$day_week <- wday(retail$date, label = TRUE)
+# setting up a frame with unique descriptions for further exploration of products offered
+products_list <- unique(retail$Description)
+```
+
+Checking the new structure with the new features
+```{r}
+# checking the new structure with the new features
+head(retail, 2)
+```
+
+
+**Customer data by unique Customer**
+
+Creating an interactive customer data table where you can filter the different columns to find information about specific fields, sort the features or make a search for values and/or ranges.
+```{r}
+# creation of interactive customer data table
+
+datatable(customer, class = 'cell-border stripe',filter = 'top', options = list(
+  pageLength = 10, autoWidth = TRUE, 
+  columnDefs = list(list(className = 'dt-center', targets = "_all")), searchHighlight = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    'Table 1: ', htmltools::em('Customer datatable Information '))
+  )
+```
+
+
+
+Now I have completed feature engineering and created a more complete dataset to investigate the data through the next section with Exploratory Data Analysis.
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> Lets visualize (EDA) 👓 </p>
+
+# Exploratory Data Analysis
+
+In this section I will perform an Exploratory Data Analysis (EDA). EDA will be an important factor to conduct an initial investigation inside the dataset and observe common patterns, spot anomalies and retrieve useful information about the data in a graphical way.
+
+
+Getting a visual of the Countries with the most transactions - total invoices.
+
+```{r}
+plot_clean1 <- retail %>% 
+  group_by(Country) %>% 
+  dplyr::summarise(n = n()) 
+
+
+highchart() %>% 
+  hc_chart(type ="column",
+           options3d = list(enabled = TRUE, alpha = 15, beta = 15)) %>%
+  hc_xAxis(categories = plot_clean1$Country) %>% 
+  hc_add_series(data = plot_clean1$n, name = "Total Invoices") %>%
+  hc_add_theme(hc_theme_google()) %>%
+  hc_title(
+    text="Total Invoices - Transaction per Country"
+    ) %>%
+    hc_chart(
+      borderColor = '#EBBA95',
+      borderRadius = 10,
+      borderWidth = 1,
+      backgroundColor = list(
+        linearGradient = c(0, 0, 500, 500), stops = list(
+               list(0, 'rgb(255, 255, 255)'),
+               list(1, 'rgb(200, 200, 255)')
+             )))
+```
+
+
+We can see that the orders of the store come mainly from the UK.
+
+
+To get a better look of the transactions that happen outside the UK we will plot again the total invoices excluding UK this time and lets arange it also in a descending order.
+
+```{r}
+plot_clean <- retail %>% 
+  group_by(Country) %>% 
+  filter(Country != "United Kingdom") %>% 
+  dplyr::summarise(n = n()) %>% 
+  arrange(-n)
+
+highchart() %>% 
+  hc_chart(type ="column",
+           options3d = list(enabled = TRUE, alpha = 15, beta = 15)) %>%
+  hc_xAxis(categories = plot_clean$Country) %>% 
+  hc_add_series(data = plot_clean$n, name = "Total Invoices") %>%
+  hc_add_theme(hc_theme_sandsignika()) %>%
+  hc_title(
+    text="Total Invoices - Transaction per Country excl. UK (descending)"
+    ) %>%
+    hc_chart(
+      borderColor = '#EBBA95',
+      borderRadius = 10,
+      borderWidth = 1,
+      backgroundColor = list(
+        linearGradient = c(0, 0, 500, 500), stops = list(
+               list(0, 'rgb(255, 255, 255)'),
+               list(1, 'rgb(200, 200, 255)')
+             )))
+```
+
+We can see that most transactions outside of the UK occur in Germany and France, this is where we expect that we will have more customers also outside of the UK.
+
+
+I will take the top 5 countries by Revenue to get some more insight about them.
+
+```{r}
+retail_country <- retail %>%
+  group_by(Country) %>%
+  dplyr::summarise(revenue = sum(Spent), transactions = n_distinct(InvoiceNo)) %>%
+  mutate(aveOrdVal = (round((revenue / transactions),2))) %>%
+  ungroup() %>%
+  arrange(desc(revenue))
+
+top_countries_filter <- retail %>%
+  filter(Country == 'Netherlands' | Country == 'EIRE' | Country == 'Germany' | Country == 'France' 
+         | Country == 'Australia')
+
+top_5 <- top_countries_filter %>%
+  group_by(Country, date) %>%
+  dplyr::summarise(revenue = sum(Spent), transactions = n_distinct(InvoiceNo), 
+                   customers = n_distinct(CustomerID)) %>%
+  mutate(aveOrdVal = (round((revenue / transactions),2))) %>%
+  ungroup() %>%
+  arrange(desc(revenue))
+
+top_5 %>% 
+  group_by(Country) %>%
+  dplyr::summarise(revenue = sum(revenue)) %>% 
+  hchart('treemap', hcaes(x = 'Country', value = 'revenue', color = 'revenue')) %>%
+  hc_add_theme(hc_theme_elementary()) %>%
+  hc_title(text=" Top 5 Countries by Revenue excl. UK")
+```
+
+We can see that the top 5 countries excluding UK by revenue are with descending order:
+
+1. Netherlands
+2. EIRE (Ireland)
+3. Germany
+4. France
+5. Australia
+
+I will check the revenue of these countries over time.
+```{r, message = FALSE, warning = FALSE}
+
+ggplot(top_5, aes(x = date, y = revenue, colour = Country)) + geom_smooth(method = 'auto', se = FALSE) + 
+  labs(x = ' Country', y = 'Revenue', title = 'Revenue by Country over Time') + 
+  theme(panel.grid.major = element_line(colour = NA),
+    legend.text = element_text(colour = "skyblue4"),
+    legend.title = element_text(face = "bold"),
+    panel.background = element_rect(fill = NA),
+    plot.background = element_rect(fill = "seashell1",
+        colour = NA), legend.key = element_rect(fill = "gray71"),
+    legend.background = element_rect(fill = NA))
+```
+
+We can observe that the Netherlands and Australia had a sharp drop in generated revenue after the summer of 2021.
+
+I will take a look on the total revenue chart by date from the total amount spent by customers.
+
+```{r}
+revenue_date1 <- retail %>%
+  group_by(date) %>%
+  dplyr::summarise(revenue = sum(Spent))
+
+time_series <- xts(
+  revenue_date1$revenue, order.by = revenue_date1$date)
+
+
+highchart(type = "stock") %>% 
+  hc_title(text = "Revenue by Date") %>% 
+  hc_subtitle(text = "Revenue generated from the online store") %>% 
+  hc_add_series(time_series) %>%
+  hc_add_theme(hc_theme_darkunica()) 
+
+```
+
+From the Revenue chart we can see a steady positive increase in generated revenue over time in the year of 2021 for the retail store with a peak on September 20, 2021.
+
+```{r, include = FALSE}
+rm(time_series)
+```
+
+Now I will plot some time focused plots to explore transaction and revenue patterns.
+
+**Revenue by the different day of the week**
+
+
+```{r}
+retail %>%
+  group_by(day_week) %>%
+  dplyr::summarise(revenue = sum(Spent)) %>%
+  hchart(type = 'column', hcaes(x = day_week, y = revenue)) %>% 
+  hc_yAxis(title = list(text = "Revenue")) %>%  
+  hc_xAxis(title = list(text = "Day of the Week")) %>% 
+  hc_title(text = "Revenue by Day of Week")
+```
+
+
+From the graph above we can observe that customers are buying considerably less products during Sundays.
+
+
+**Revenue and transactions by Hour of the Day**
+
+```{r}
+retail %>%
+  group_by(hour) %>%
+  dplyr::summarise(revenue = sum(Spent)) %>%
+  hchart(type = 'column', hcaes(x = hour, y = revenue)) %>% 
+  hc_yAxis(title = list(text = "Revenue")) %>%  
+  hc_xAxis(title = list(text = "Hour Of Day")) %>% 
+  hc_title(text = "Revenue by Hour Of Day")
+
+retail %>%
+  group_by(hour) %>%
+  dplyr::summarise(transactions = n_distinct(InvoiceNo)) %>%
+  hchart(type = 'column', hcaes(x = hour, y = transactions)) %>% 
+  hc_yAxis(title = list(text = "Number of Transactions")) %>%  
+  hc_xAxis(title = list(text = "Hour Of Day")) %>% 
+  hc_title(text = "Transactions by Hour Of Day")
+
+```
+
+We can see that the peak hours of the store for transactions and consequently as we would expect for revenue also occurs during the middle of the day.
+Particularly the most busy hour is around 12 at noon where both plot graphs see their peak.
+
+Lets also visualize where most of our unique customers come from without United Kingdom which we know is the majority of our customer base.
+
+```{r, warning=FALSE,message=FALSE}
+
+# Wordcloud
+topic.corpus <- Corpus(VectorSource(customer$Country))
+
+removeHTML <- function(text){
+  text <- gsub(pattern = '<.+\\">', "",text)
+  text <- gsub(pattern = '</.+>', "", text)
+  return(text)
+}
+
+topic.corpus <- topic.corpus %>% 
+  tm_map(content_transformer(removeHTML)) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(stripWhitespace) %>%
+  tm_map(content_transformer(tolower)) %>%
+  tm_map(removeWords, stopwords("english")) %>%
+  tm_map(removeWords, stopwords("SMART")) 
+
+tdm = TermDocumentMatrix(topic.corpus) %>%
+  as.matrix()
+words = sort(rowSums(tdm), decreasing = TRUE)
+df = data.frame(word = names(words), freq = words)
+
+df = df %>%
+  filter(nchar(as.character(word)) > 1,
+         word != "united" , word != "kingdom")
+
+uxc.colors = c("#fefefe", "#f4f2a8", "#030303")
+uxc.background = "#00ccff"
+
+
+wordcloud2(df,
+           color = rep_len(uxc.colors, nrow(df)),
+           backgroundColor = uxc.background,
+           fontFamily = "DM Sans",
+           size = 1,
+           minSize = 3,
+           rotateRatio = 0)
+
+
+```
+The main customer base outside the UK comes from Germany, France and following up is Spain and Belgium.
+
+
+Product Exploration
+
+**Sadly Wordcloud2 package seems to have a limitation as you can only have one wordcloud from the package on your output.. which is weird.. so for the next wordclouds I will use the regular R wordcloud package**
+
+*The dataset does not provide product categories and outlooks, so I will try to engineer some product categories based on the available data descriptions of the products so that we can put the products into groups*
+
+Exploring the 20 most common words from product Descriptions, visualizing with a wordcloud and getting interactive tooltip of the amount of times they appear on unique product descriptions
+
+
+```{r}
+# preparing and cleaning the text
+
+docs <- Corpus(VectorSource(products_list))
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, toSpace, "/")
+docs <- tm_map(docs, toSpace, "@")
+docs <- tm_map(docs, toSpace, "\\|")
+# Convert the text to lower case
+docs <- tm_map(docs, content_transformer(tolower))
+# Remove numbers
+docs <- tm_map(docs, removeNumbers)
+# Remove english common stopwords
+docs <- tm_map(docs, removeWords, stopwords("english"))
+# Remove punctuations
+docs <- tm_map(docs, removePunctuation)
+# Eliminate extra white spaces
+docs <- tm_map(docs, stripWhitespace)
+
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+
+set.seed(1234)
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+          max.words=20, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+```
+
+From the above wordcloud we can see that some common words that we dont want appear like colours, so we will try to remove them before we make some product categories
+
+```{r}
+# preparing and cleaning the text
+
+docs <- Corpus(VectorSource(products_list))
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, toSpace, "/")
+docs <- tm_map(docs, toSpace, "@")
+docs <- tm_map(docs, toSpace, "\\|")
+# Convert the text to lower case
+docs <- tm_map(docs, content_transformer(tolower))
+# Remove numbers
+docs <- tm_map(docs, removeNumbers)
+# Remove english common stopwords
+docs <- tm_map(docs, removeWords, stopwords("english"))
+# Remove your own stop word
+# specify your stopwords as a character vector
+docs <- tm_map(docs, removeWords, c("pink", "blue","red","set","white","metal", "glass","large","small","holder"))
+# Remove punctuations
+docs <- tm_map(docs, removePunctuation)
+# Eliminate extra white spaces
+docs <- tm_map(docs, stripWhitespace)
+
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+
+set.seed(1234)
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+          max.words=20, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+```
+
+
+From the cleaned product wordcloud above we can distinguish some product categorization that the shop offers.
+
+It seems that the following product categories are mainly offered
+
+**Product categories:**
+- Decoration products
+- Christmas related products
+- Bags
+- Vintage design focused products
+- Flowers and presents
+
+**World Map**
+To visualize the revenue streams of the store from around the world I will plot a world map showing the different countries where transactions have occurred in a logarithmic revenue metric.
+
+
+```{r map, result='asis', message=FALSE, warning=FALSE}
+map_info <- retail %>% 
+  group_by(Country) %>% 
+  dplyr::summarise(revenue = sum(Spent))
+  
+highchart(type = "map") %>%
+  hc_add_series_map(worldgeojson,
+                    map_info %>% 
+                      bind_cols(as_tibble(map_info$revenue)) %>% 
+                      group_by(map_info$Country) %>% 
+                      dplyr::summarise(revenue = log1p(sum(value))) %>% 
+                      ungroup() %>% 
+                      mutate(iso2 = countrycode(sourcevar = map_info$Country, 
+                          origin="country.name", destination="iso2c")),
+                    value = "revenue", joinBy = "iso2") %>%
+  hc_title(text = "Revenue by country (log)") %>%
+  hc_tooltip(useHTML = TRUE, headerFormat = "",
+             pointFormat = "{point.map_info$Country}") %>% 
+  hc_colorAxis(stops = color_stops(colors = viridisLite::inferno(10, begin = 0.1)))
+```
+
+To sum up this section, we see from the World map that the online store has transactions and customers all around the globe but its main transactions are:
+- UK
+- Europe (Germany, France mainly)
+- Australia
+- Japan
+
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> Clustering 📊 </p>
+
+# Segmentation - Clustering
+
+**Clustering:**
+The clustering problem is described as the problem of locating homogeneous groupings of data points in a given data collection in its most basic form.
+
+Any clustering algorithm aims to keep the distance between data points in a cluster as little as possible relative to the distance between two clusters. In other words, individuals of one group are quite similar, whereas members of separate groups are very distinct.
+
+
+One of the most widely used and researched clustering methods is the K-means clustering algorithm. Thus, I am utilizing it for clustering the customers.
+
+**RFM: Recency, Frequency, Monetary Value:**
+RFM analysis is a prominent client segmentation and identification tool in database marketing. It is crucial, especially in the retail industry. RFM assigns a score to each consumer based on three elements.
+
+- *Recency*: It refers to the number of days before the reference date when a customer made the last purchase. The lesser the value of recency, the higher is the customer visit to a store.
+- *Frequency*: It is the period between two subsequent purchases of a customer. The higher the value of Frequency, the more is the customer visit to the company.
+* *Monetary*: This refers to the amount of money a customer spends during a specific period. The higher the value, the more is the profit generated to the company.
+
+
+**K-means clustering:**
+K-means clustering is an iterative clustering approach. The K-Means algorithm uses the Euclidean distance metric to partition the customers for RFM values. The number of groups K is predefined, and each data point is assigned to one of the K clusters repeatedly based on feature similarity.
+
+
+**Choosing the best number of clusters K:**
+The number of clusters is the essential input for k-means clustering. This is calculated using the principle of minimizing the within-clusters-sum of square (WCSS). The number of clusters is plotted on the X-axis, and the WCSS for each cluster number is plotted on the y axis.
+
+
+To determine the optimal number of clusters, use the scree plot/Elbow approach.
+The WCSS decreases as the number of clusters increases. The decline in WCSS is sharp at first, but the rate of decrease eventually slows, resulting in an elbow plot. The number of clusters in the elbow formation usually indicates the ideal clusters.
+
+
+
+
+
+
+## RFM feature engineering {.tabset .tabset-fade .tabset-pills}
+
+We will create customer categories
+
+Before we dive into clustering our customers, we have to feature engineer our RFM values to have a solid dataframe for the clustering.
+
+### Recency
+*Recency:* It refers to the number of days before the reference date when a customer made the last purchase. Lesser the value of recency, higher is the customer visit to a store.
+
+
+
+```{r}
+recency <- retail %>% 
+  dplyr::select(CustomerID, InvoiceDate) %>% 
+  mutate(recency = as.Date("2011-12-09") - as.Date(InvoiceDate))
+
+recency <- recency %>% 
+  dplyr::select(CustomerID, recency) %>% 
+  group_by(CustomerID) %>% 
+  slice(which.min(recency))
+
+head(recency,3)
+```
+
+We have constructed our recency feature and we can see the number of days since the last purchase of its individual unique customer of the store
+
+### Frequency
+*Frequency:* It is the period between two subsequent purchases of a customer. Higher the value of Frequency, more is the customer visit to the company.
+```{r}
+amount_products <- retail %>%
+    dplyr::select(CustomerID, InvoiceDate) %>% 
+    group_by(CustomerID, InvoiceDate) %>% 
+    summarize(n_prod = n())
+
+df_frequency <- amount_products %>% 
+    dplyr::select(CustomerID) %>%
+    group_by(CustomerID) %>% 
+    summarize(frequency = n())
+
+head(df_frequency,3)
+```
+
+
+
+### Monetary value
+*Monetary:* This refers to the amount of money spent by a customer during a specific period of time. Higher the value, more is the profit generated to the company.
+
+We have the total revenue per customer ready from previous feature engineering with the Spent feature so we will just drop the other columns
+```{r}
+monetary <- select(customer, c("CustomerID", "Spent"))
+
+
+head(monetary,3)
+```
+
+### RFM complete table
+
+Now that our RFM engineering is complete we can join the 3 data frames for a complete dataframe that will serve the RFM clustering analysis for the customers of the store
+
+```{r}
+# inner join the three RFM data frames by CustomerID
+rfm <- recency %>% 
+  dplyr::inner_join(., df_frequency, by = "CustomerID") %>% 
+  dplyr::inner_join(., monetary, by = "CustomerID")
+
+# drop the days from recency column and transform it into numeric data type
+rfm <- rfm %>% 
+  mutate(recency = str_replace(recency, " days", "")) %>% 
+  mutate(recency = as.numeric(recency)) %>% 
+  ungroup()
+
+head(rfm, 3)
+
+# Deleting the CustomerID column to have only our 3 RFM features for our modelling data frame
+rfm_clean <- select(rfm, -CustomerID)
+```
+
+
+Plotting RFM values
+
+
+```{r}
+h1 <- hchart(
+  rfm_clean$recency, 
+  color = "#B71C1C", name = "Recency")
+
+h2 <- hchart(
+  rfm_clean$frequency, 
+  color = "#668F80", name = "Frequency")
+
+h3 <- hchart(
+  rfm_clean$Spent, 
+  color = "#4A6670", name = "Monetary Value")
+
+htmltools::browsable(hw_grid(h1, h2, h3, ncol = 3, rowheight = 500))
+```
+
+From the plots we can see the different distributions that occur for the 3 RFM attributes.
+
+## K-means Clustering
+
+**Scaling the data**
+
+- *Why we need to normalize the data*
+
+Clustering is the process of calculating the similarity between two samples by integrating all of their feature data into a numeric number. When combining feature data, the data must be of the same scale. By scaling the data, you can bring numerous features to the same scale.
+
+For k-means approach it is best use to scale your data.
+
+```{r}
+# scaling
+rfm_norm <- scale(rfm_clean)
+summary(rfm_norm)
+```
+
+
+### Calculating how many clusters we need {.tabset .tabset-fade .tabset-pills}
+
+Before we do the actual clustering, we need to identify the Optimal number of clusters (k) for this data set of wholesale customers. The popular way of determining number of clusters are
+
+1. Elbow Method
+2. Silhouette Method
+3. Gap Static Method
+
+Elbow and Silhouette methods are direct methods and gap statistic method is the statistics method.
+
+#### Elbow method
+
+```{r}
+fviz_nbclust(rfm_norm, kmeans, method="wss")+geom_vline(xintercept=3,linetype=2) + labs(subtitle = "Elbow method")
+```
+
+Based on the Elbow method chart we could use 3, 4, 5 or even 6 clusters based on the slope and getting closed to zero. But is subjective in which it works better.
+
+
+Lets test the optimum number of cluster with the Silhouette method also:
+
+#### Silhouette method
+
+The silhouette co efficient estimates the average distance between clusters. The silhouette plot shows the silhouette co efficient over values of k ranging from 1 to 10. 
+```{r}
+fviz_nbclust(rfm_norm,kmeans, method = "silhouette")+labs(subtitle = "Silhouette method") 
+```
+
+This plot shows the highest average silhouette co-efficient occurring when k = 4.
+
+I will test the optimum number with Gap statistics as well:
+
+#### Gap statistic method
+
+The gap statistic compares intra cluster variation for different values of k with expected intra cluster variation under null distribution. Ideally we should be choosing the value of k which maximizes the gap statistic however in real world datasets where clusters are not so well defined it may be more parsimonious to choose the k value to be the one where the rate of increase of the statistic begins to slow down (i.e. value lowest value of k that is greater than or equal to the value of k+1 minus the standard error)
+
+Lets see what we get
+```{r}
+library(cluster)
+# compute gap statistic
+set.seed(123)
+  gap_stat <- clusGap(rfm_norm, FUN = kmeans, nstart = 25,
+                 K.max = 10, B = 50)
+
+fviz_gap_stat(gap_stat) + labs(subtitle = "Gap statistic method")
+```
+
+As we can see from the graph the rate of increase begins to slow down on k = 3, as such gap statistics proposes that the optimal number of clusters k is 3.
+
+
+#### Finding the optimum number of clusters
+
+One of the most discussed disadvantages of k-means clustering, is the subjective nature of choosing the optimal k number of clusters.
+
+To avoid the subjective guesswork that follows the visual observation of cluster results, I will use the NbClust R package. While there are several programs and packages that do validation for a particular clustering solution, different validation metrics yield different results for different clustering algorithms. 
+
+The NbClust package can help us with determining the best number of clusters for our data.
+Charrad et al., 2014, developed the NbClust package, which includes 30 indices for determining the relevant number of clusters and recommends the optimum clustering scheme based on the various results achieved by adjusting the number of clusters, distance measurements, and clustering methodologies.
+
+```{r, include=TRUE ,results="hide"}
+# NbClust package for determining the best number of clusters
+library(NbClust)
+
+NbClust(rfm_norm, distance = "euclidean", min.nc = 2, max.nc = 10, method = "kmeans")
+```
+
+**The Hubert index:**- It is a graphical method of determining the number of clusters. In the plot of Hubert index, we seek a significant knee that corresponds to a significant increase of the value of the measure i.e the significant peak in Hubert index second differences plot.
+
+From the Hubert index results:
+
+***Among all indices:***      
+
+- 3 proposed 2 as the best number of clusters 
+- 6 proposed 3 as the best number of clusters 
+- 3 proposed 4 as the best number of clusters 
+- 3 proposed 6 as the best number of clusters 
+- 3 proposed 9 as the best number of clusters 
+- 5 proposed 10 as the best number of clusters
+
+Consequently, the ideal number of clusters, according to the majority rule, is three, k = 3. However, we see that 5 indices proposed 10 as the best number of clusters, which is very close. While with 10 clusters you would have more unique demonstrable groups, the categorization might get too specific and with large clusters there is danger of overfitting the data.
+
+
+### Clusters - Visualizing {.tabset .tabset-fade .tabset-pills}
+
+#### k = 3 clusters
+
+After running several tests above, we can conclude that the most appropriate optimal number of clusters for our data set seems to be k = 3, so we will compute k-means with k = 3 to segment the customers into groups.
+
+
+```{r}
+# Compute k-means with k = 3 
+
+set.seed(123)
+km.res <- kmeans(rfm_norm, 3, nstart = 10) # 3 centers, and nstart set to 10 random sets
+
+km.res$centers # centroids from model on normalized data
+```
+
+As we can see from the results, Cluster 3 has the highest transactions recency, but what is really interesting is that Cluster 2 has the highest transaction frequency, as well as the highest transaction amount compared to the other 2 clusters. 
+
+Lets also check the amount of customers in each cluster.
+
+```{r}
+km.res$size
+```
+
+
+
+```{r}
+km.res$betweenss/km.res$totss
+```
+
+The score (between_SS / total_SS) is 58.2% which is relatively good. This ratio is the total sum of squares of the data points that are shared between the clusters.
+
+**Visualization of the clustering algorithm results**
+
+
+
+```{r}
+set.seed(123)
+fviz_cluster(km.res, geom = "point", data = rfm_norm) + ggtitle("k = 3")
+```
+
+First of all we see this extreme distribution because of the k-means disadvantage at dealing with outliers.
+
+We have 3 demonstable clusters, with cluster 2 containing the most valuable customers.
+
+
+```{r}
+frm_k3 <- rfm %>% 
+  mutate(cluster = km.res$cluster)
+
+frm_k3
+```
+
+
+So we can see that cluster 2, is our MVP customers that have generated the most revenue having Spent the most money in the products of the store.
+In cluster 1 we have different kind of groups who can be potential valuable customers for the business, as either they purchase a lot or have made a transaction recently singaling new opportunities.
+
+#### k = 10 clusters
+
+```{r}
+# Compute k-means with k = 10 
+
+set.seed(123)
+km.res_10 <- kmeans(rfm_norm, 10, nstart = 10) # 10 centers, and nstart set to 10 random starts
+
+km.res_10$centers # centroids from model on normalized data
+```
+
+
+
+Lets also check the amount of customers in each cluster.
+
+```{r}
+km.res_10$size
+```
+
+
+```{r}
+km.res_10$betweenss/km.res_10$totss
+```
+
+As expected when we have more clusters the ratio increases to 89.4%.
+
+**Visualization of the clustering algorithm results**
+
+
+
+```{r}
+set.seed(123)
+fviz_cluster(km.res_10, geom = "point", data = rfm_norm) + ggtitle("k = 10")
+```
+
+
+
+```{r}
+frm_k10 <- rfm %>% 
+  mutate(cluster = km.res_10$cluster)
+
+head(frm_k10)
+```
+
+```{r}
+frm_k10 %>%
+  group_by(cluster) %>% 
+  summarize(number = n(),
+            frequency = round(mean(frequency)),
+            recency = round(mean(recency)),
+            monetary = round(mean(Spent)))
+```
+
+With 10 clusters we have to be careful as there is a chance that we are over fitting the data. As such k = 3 clusters is prefered
+
+
+## RFM analysis
+
+To find our most valuable customers based on RFM analysis I will also use the [rfm package](https://rfm.rsquaredacademy.com/index.html), which based on the input will give automate RFM scores for our customers.
+
+According to the Pareto principle, 20% of the customers (the vital few) contribute more to the revenue of the company than the rest.
+It argues that 80 percent of effects can be traced back to as few as 20% of all causes — these 20% of causes are vital, and the remaining 20% of effects is then naturally dispersed to be mapped with the remaining 80% causes — they are trivial numerous. These 20% are the high-value, important consumers that the company would like to keep.
+
+```{r}
+recency_s <- retail %>% 
+  dplyr::select(CustomerID, date) %>% 
+  group_by(CustomerID) %>% 
+  slice(which.max(date))
+
+rfm_test <- customer %>% inner_join(recency_s, by = "CustomerID")
+
+rfm_test <- rfm_test %>% left_join(rfm, by = "CustomerID") 
+
+library(rfm)
+rfm_result <- rfm_table_customer(rfm_test, CustomerID, Quantity, recency, Spent.x, as.Date("2011-12-09"))
+rfm_datatable <- rfm_result$rfm
+```
+
+
+Creation of interactive customer data table with RFM scores, to observe values
+
+```{r}
+# creation of interactive customer data table with RFM scores, to observe his values
+rfm_datatable_print <- rfm_datatable %>% 
+  select(-recency_days,-transaction_count, - amount)
+
+datatable(rfm_datatable_print, class = 'cell-border stripe',filter = 'top', options = list(
+  pageLength = 10, autoWidth = TRUE, 
+  columnDefs = list(list(className = 'dt-center', targets = "_all")), searchHighlight = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+    'Table 1: ', htmltools::em('Customer Values - RFM scores '))
+ )
+```
+
+Creation of interactive customer data table with RFM scores for approximately the top 20% of customers, who are the most vital for the business
+
+```{r}
+# get the top 20% of rfm_score of Customers, to find the most valuable customers 
+n <- 20
+top_20 <- rfm_datatable %>% 
+  subset(rfm_score >  quantile(rfm_score, prob = 1 - n/100))
+
+top_20 <- top_20 %>% 
+  select(customer_id, recency_days, transaction_count, amount, rfm_score)
+
+datatable(top_20, class = 'cell-border stripe',filter = 'top', options = list(
+  pageLength = 10, autoWidth = TRUE, 
+  columnDefs = list(list(className = 'dt-center', targets = "_all")), searchHighlight = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+  'Table 1: ', htmltools::em('Most valuable customers (~20% of total) '))
+  )
+```
+
+These are the customers that according to Pareto they generate most of the revenue and they are vital for the business, as such retaining these customers and conducting good business with is essential for the business long-term health and success!
+
+However, a point that needs to be made is that for the calculation of the total RFM score, all three of the attributes had the same weight. Thus, we could debate that probably monetary value (amount), should have a bigger weight than recency or number of transactions.
+
+Also the data we have contains transactions of just over one year of business, which is not that much to accurately distinguish the customer base appropriately.
+
+Now I will create customer segments based on the image below
+
+<center><img src="https://blog.rsquaredacademy.com/img/rfm_segments_table.png"></center>
+
+*Image source: rsquareacademy.com*
+
+**Segments**
+
+We will Segment our customers based on this proposed image from rsquareacademy.com, however there seems to be some overlaps between the conditions, so I will adjust
+
+```{r}
+rfm_segments <- rfm_datatable
+rfm_segments <- rfm_segments %>% 
+  mutate(segment = ifelse(recency_score >= 4 & frequency_score >= 4 & monetary_score >= 4, "Champion", 
+  ifelse(recency_score >= 2 & frequency_score >= 3 & monetary_score >= 3, "Loyal Customer", 
+  ifelse(recency_score >= 3 & frequency_score <= 3 & monetary_score <= 3, "Potential Loyalist",
+  ifelse(recency_score >= 4 & frequency_score <= 1 & monetary_score <= 1, "New Customer",
+  ifelse((recency_score == 3 | recency_score == 4) & frequency_score <= 1 & monetary_score <= 1, "Promising",
+  ifelse((recency_score == 2 | recency_score == 3) & (frequency_score == 2 | frequency_score == 3) & 
+           (monetary_score == 2 | monetary_score == 3), "Need Attention",
+  ifelse((recency_score == 2 | recency_score == 3) & frequency_score <= 2 & monetary_score <= 2, "About to Sleep",
+  ifelse(recency_score <= 2 & frequency_score > 2 & monetary_score > 2, "At Risk",
+  ifelse(recency_score <= 1 & frequency_score >= 4 & monetary_score >= 4, "Can't lose them",
+  ifelse(recency_score <= 2 & frequency_score == 2 & monetary_score == 2, "Hibernating", "Lost")))))))))))
+```
+
+
+Now we have our customer categories/segments ready to differentiate them and act
+
+Lets first plot the number of customers that we have in each segment.
+
+```{r}
+# checking segments size
+
+rfm_segments %>%
+  group_by(segment) %>% 
+  count(segment) %>%
+  arrange(desc(n)) %>%
+  rename(Segment = segment, Count = n)
+```
+
+```{r}
+rfm_plot_median_monetary(rfm_segments)
+```
+
+We see how the median monetary value is generated mainly by our Champion Customers. At second place comes a tie with Loyal Customers and customers At Risk, which are customers who have generated revenue for the store. Still, their recency score is low, so the store should focus on retaining these customers through marketing campaigns, promotions, and potential discounts, thus enforcing their relationship.
+
+Lets have a table that can distinguish each of the stores customers so that they can treat them accordingly and focus on the vital customers that will enforce the prosperity of the business.
+
+
+
+```{r}
+plot_segments <- rfm_segments %>% 
+  select(customer_id, segment)
+
+datatable(plot_segments, class = 'cell-border stripe',filter = 'top', options = list(
+  pageLength = 10, autoWidth = TRUE, 
+  columnDefs = list(list(className = 'dt-center', targets = "_all")), searchHighlight = TRUE),
+  caption = htmltools::tags$caption(
+    style = 'caption-side: bottom; text-align: center;',
+  'Table 1: ', htmltools::em('Customers by segment'))
+  )
+```
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> Conclusion 🔒 </p>
+# Conclusion
+
+In this analysis I explored the online retail data to try and observe important factors for the business and segment the customer base into insightful information that can be implemented for better customer relationship management. 
+
+More specifically I identified 3 important customer clusters through the k-means approach with one cluster containing 25 of the most valuable MVP customers of the business.
+
+Consequently I implemented an RFM analysis and segmented the customers into more specific groups to drive actions.
+The interactive *datatable* above can serve as an indicative for CRM practices.
+
+**Other key differentiators**
+For more in depth division of customers into appropriate groups, other data that could be used include:
+
+- Demographics (age, race, religion, gender, family size, ethnicity, income, education level)
+
+- Psychographic (social class, lifestyle and personality characteristics)
+
+- Geography (more specific locations)
+
+**K-means clustering algorithm & Disadvantages:**
+
+K-means clustering is a straightforward and quick technique. Furthermore, it is capable of handling massive data sets with ease. The k-means strategy, on the other hand, has some flaws. K-means clustering has the drawback of requiring us to define the number of clusters ahead of time. Another downside of K-means is that it is sensitive to outliers, and different results can be obtained if the data is reordered.
+
+Same stands for RFM analysis. At the end, the way that a company would choose to segment its customer base would depend upon the philosophy and culture of the company. Furthermore, the unique type of product or service they provide would also play a major role on the approach that they would want to use, as well as, the categorization of their customers and where they would want to focus their efforts for better customer relationships and thus profitable future.
+
+To sum up, whatever the results, before making business decisions we should never forget that clustering is a model, and while in most cases it is able to generate value, it should always be treated as one.
+
+
+<center><img src="https://quotefancy.com/media/wallpaper/3840x2160/1503109-George-E-P-Box-Quote-All-models-are-wrong-but-some-are-useful.jpg"></center>
+
+*Image source: quotefancy.com*
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> References 📚 </p>
+
+
+# References
+
+
+
+For more information about Clustering in Machine Learning and Customer Segmentation I provide a list of references I consulted:
+
+- [Clustering in Machine Learning by Google developers](https://developers.google.com/machine-learning/clustering)
+
+- [A Quick Introduction to Clustering in R](https://rstudio-pubs-static.s3.amazonaws.com/375287_5021917f670c435bb0458af333716136.html)
+
+- [RFM package and analysis](https://rfm.rsquaredacademy.com/index.html)
+
+- [RFM model for customer purchase behavior using K-Means algorithm, Journal of King Saud University](https://www.sciencedirect.com/science/article/pii/S1319157819309802)
+
+<p style="background-color:#101820FF ;color:#FEE715FF;font-size:25px;text-align:center;border-radius:10px 10px;font-weight:bold;border-style:solid;border-color:#101820FF;"> 🎊🎉🏁 End 🏁🎉🎊 </p>
+
