@@ -152,6 +152,7 @@ library(rmarkdown)
 library(knitr)
 library(DT)
 library(wordcloud2) # Wordclouds
+library(wordcloud)
 library(extrafont) # Wordclouds
 library(SnowballC) # Wordclouds
 library(tm) # Wordclouds
